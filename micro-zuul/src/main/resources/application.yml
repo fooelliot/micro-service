@@ -1,0 +1,39 @@
+spring:
+    application:
+        name: micro-zuul
+server:
+  port: 9999
+
+zuul:
+  prefix: /api                  #为zuul设置一个公共的前缀
+  routes:
+    provider-product:          #自定义，当不存在serviceId时，默认该值为serviceId（就是注册服务的名称，属性spring.application.name）
+      path: /product/**          #匹配/api/product/** 均路由到micro-product
+      serviceId: micro-product
+    provider-order:
+      path: /order/**
+      serviceId: micro-order
+    provider-user:
+      path: /user/**
+      serviceId: micro-user
+
+
+ribbon:
+  eureka:
+    enabled: false                  #配置zuul路由时用将此属性设置为false
+
+micro-user:                     #这是ribion要请求的serviceID
+  ribbon:
+    listOfServers: http://127.0.0.1:9901,http://127.0.0.1:9902   #为provider-product服务指定一组服务地址，应该是用于负载均衡
+micro-product:
+  ribbon:
+    listOfServers: http://127.0.0.1:9906,http://127.0.0.1:9907
+
+eureka:
+  client:
+    service-url:
+           defaultZone: http://localhost:8761/eureka
+
+feign:
+  hystrix:
+    enabled: true
